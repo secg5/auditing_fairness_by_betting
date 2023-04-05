@@ -83,21 +83,24 @@ if __name__ == '__main__':
     lb_0, ub_0 = hedged_cs(means_0)
     lb_1, ub_1 = hedged_cs(means_1)
 
+    norm_1 = 0
+    norm_0 = 0
+    for x_0 in range(3):
+        norm_0 += (1- scipy.special.expit(x_0))*(p_x_0[x_0])
+        norm_1 += scipy.special.expit(x_0)*(p_x_0[x_0])
+
     E_0 = 0
     E_1 = 0
     for x_0 in range(3):
-        E_0 += scipy.special.expit(0 - x_0)*(p_x_0[x_0])
-        E_1 += scipy.special.expit(2 - x_0)*(p_x_0[x_0])
-
-    print(E_0, E_1)
+        E_0 += scipy.special.expit(-x_0)*((1- scipy.special.expit(x_0))*(p_x_0[x_0])/norm_0)
+        E_1 += scipy.special.expit(2 -  x_0)*(scipy.special.expit(x_0)*(p_x_0[x_0])/norm_1)
+    
 
     fig, axs = plt.subplots(1, 2)
-    axs[0].plot(means_1)
-    axs[0].plot(means_0)
-    # axs[0].plot(np.arange(TIME_STEPS), lb_0, c='navy', label='A = 0')
-    # axs[0].plot(np.arange(TIME_STEPS), ub_0, c='navy')
-    # axs[0].plot(np.arange(TIME_STEPS), lb_1, c='tab:olive', label='A = 1')
-    # axs[0].plot(np.arange(TIME_STEPS), ub_1, c='tab:olive')
+    axs[0].plot(np.arange(TIME_STEPS), lb_0, c='navy', label='A = 0')
+    axs[0].plot(np.arange(TIME_STEPS), ub_0, c='navy')
+    axs[0].plot(np.arange(TIME_STEPS), lb_1, c='tab:olive', label='A = 1')
+    axs[0].plot(np.arange(TIME_STEPS), ub_1, c='tab:olive')
     axs[0].axhline(E_0, ls='--', c='k')
     axs[0].axhline(E_1, ls='--', c='r')
     fig.suptitle("Confidence sequence for E[y|A]_t")
@@ -105,17 +108,18 @@ if __name__ == '__main__':
 
     s_means_1, s_means_0 = simulate_data_same_means(DATASE_SIZE, TIME_STEPS)
 
-    lb_0, ub_0 = hedged_cs(s_means_0)
-    lb_1, ub_1 = hedged_cs(s_means_1)
+    s_lb_0, s_ub_0 = hedged_cs(s_means_0)
+    s_lb_1, s_ub_1 = hedged_cs(s_means_1)
 
-    axs[1].plot(np.arange(TIME_STEPS), lb_0, c='navy', label='A = 0')
-    axs[1].plot(np.arange(TIME_STEPS), ub_0, c='navy')
-    axs[1].plot(np.arange(TIME_STEPS), lb_1, c='tab:olive', label='A = 1')
-    axs[1].plot(np.arange(TIME_STEPS), ub_1, c='tab:olive')
-    #plt.axhline(E_0, ls='--', c='k')
-    #plt.axhline(E_1, ls='--', c='r')
+    axs[1].plot(np.arange(TIME_STEPS), s_lb_0, c='navy', label='A = 0')
+    axs[1].plot(np.arange(TIME_STEPS), s_ub_0, c='navy')
+    axs[1].plot(np.arange(TIME_STEPS), s_lb_1, c='tab:olive', label='A = 1')
+    axs[1].plot(np.arange(TIME_STEPS), s_ub_1, c='tab:olive')
+
+
     axs[1].legend()
     fig.savefig("confidence_sequence")
+    plt.close()
 
     plt.plot(np.abs(np.array(lb_0) - np.array(ub_1)))
     plt.title("Absolute value of difference in means")
@@ -123,6 +127,6 @@ if __name__ == '__main__':
 
     
     plt.figure(2)
-    plt.plot(np.abs(np.array(lb_0) - np.array(ub_1)))
+    plt.plot(np.abs(np.array(s_lb_0) - np.array(s_ub_1)))
     plt.title("Absolute value of difference in bounds")
     plt.savefig("means_diference_2")
