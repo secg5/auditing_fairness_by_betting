@@ -1,6 +1,8 @@
 """The following script executes a proof of concept for auditing fairness by betting.
 The idea is using a notion of fairness to compute the ate?
 """
+
+from typing import List, Tuple
 import numpy as np 
 from scipy.stats import bernoulli
 from confseq.betting import hedged_cs
@@ -9,17 +11,17 @@ from scipy.optimize import minimize
 import scipy
 
 
-DATASE_SIZE = 1000
+DATASET_SIZE = 1000
 TIME_STEPS = 500
 p_x_0 = [0.5, 0.3, 0.2]
 
-def simulate_data_different_means(dataset_size: int, time_steps:int):
+def simulate_data_different_means(dataset_size: int, time_steps:int) -> Tuple[List[float], List[float]]:
     """Simulates a simple dataset with a random treatment 
     and a confounding variable.
 
     Args:
-        dataset_size (int): _description_
-        time_steps (int): _description_
+        dataset_size (int): Size of the dataset to simulate at each timestep.
+        time_steps (int): Number of steps to simulate for.
 
     Returns:
        Tuple with both sequences of means.
@@ -44,13 +46,13 @@ def simulate_data_different_means(dataset_size: int, time_steps:int):
 
     return means_1, means_0
 
-def simulate_data_same_means(dataset_size: int, time_steps:int):
+def simulate_data_same_means(dataset_size: int, time_steps:int) -> Tuple[List[float], List[float]]:
     """Simulates a simple dataset with a random treatment 
     and a confounding variable.
 
     Args:
-        dataset_size (int): _description_
-        time_steps (int): _description_
+        dataset_size (int): Size of the dataset to simulate at each timestep.
+        time_steps (int): Number of steps to simulate for.
 
     Returns:
        Tuple with both sequences of means.
@@ -76,9 +78,9 @@ def simulate_data_same_means(dataset_size: int, time_steps:int):
 
     return means_1, means_0
 
-if __name__ == '__main__':
 
-    means_1, means_0 = simulate_data_different_means(DATASE_SIZE, TIME_STEPS)
+if __name__ == '__main__':
+    means_1, means_0 = simulate_data_different_means(DATASET_SIZE, TIME_STEPS)
 
     lb_0, ub_0 = hedged_cs(means_0)
     lb_1, ub_1 = hedged_cs(means_1)
@@ -95,38 +97,36 @@ if __name__ == '__main__':
         E_0 += scipy.special.expit(-x_0)*((1- scipy.special.expit(x_0))*(p_x_0[x_0])/norm_0)
         E_1 += scipy.special.expit(2 -  x_0)*(scipy.special.expit(x_0)*(p_x_0[x_0])/norm_1)
     
-
     fig, axs = plt.subplots(1, 2)
-    axs[0].plot(np.arange(TIME_STEPS), lb_0, c='navy', label='A = 0')
-    axs[0].plot(np.arange(TIME_STEPS), ub_0, c='navy')
-    axs[0].plot(np.arange(TIME_STEPS), lb_1, c='tab:olive', label='A = 1')
-    axs[0].plot(np.arange(TIME_STEPS), ub_1, c='tab:olive')
-    axs[0].axhline(E_0, ls='--', c='k')
+    axs[0].plot(np.arange(TIME_STEPS), lb_0, c='blue', label='A = 0')
+    axs[0].plot(np.arange(TIME_STEPS), ub_0, c='blue')
+    axs[0].plot(np.arange(TIME_STEPS), lb_1, c='orange', label='A = 1')
+    axs[0].plot(np.arange(TIME_STEPS), ub_1, c='orange')
+    axs[0].axhline(E_0, ls='--', c='g')
     axs[0].axhline(E_1, ls='--', c='r')
     fig.suptitle("Confidence sequence for E[y|A]_t")
     axs[0].legend()
 
-    s_means_1, s_means_0 = simulate_data_same_means(DATASE_SIZE, TIME_STEPS)
-
+    s_means_1, s_means_0 = simulate_data_same_means(DATASET_SIZE, TIME_STEPS)
     s_lb_0, s_ub_0 = hedged_cs(s_means_0)
     s_lb_1, s_ub_1 = hedged_cs(s_means_1)
 
-    axs[1].plot(np.arange(TIME_STEPS), s_lb_0, c='navy', label='A = 0')
-    axs[1].plot(np.arange(TIME_STEPS), s_ub_0, c='navy')
-    axs[1].plot(np.arange(TIME_STEPS), s_lb_1, c='tab:olive', label='A = 1')
-    axs[1].plot(np.arange(TIME_STEPS), s_ub_1, c='tab:olive')
-
-
+    axs[1].plot(np.arange(TIME_STEPS), s_lb_0, c='blue', label='A = 0')
+    axs[1].plot(np.arange(TIME_STEPS), s_ub_0, c='blue')
+    axs[1].plot(np.arange(TIME_STEPS), s_lb_1, c='orange', label='A = 1')
+    axs[1].plot(np.arange(TIME_STEPS), s_ub_1, c='orange')
     axs[1].legend()
-    fig.savefig("confidence_sequence")
+    fig.savefig("confidence_sequence", dpi=300)
     plt.close()
 
-    plt.plot(np.abs(np.array(lb_0) - np.array(ub_1)))
-    plt.title("Absolute value of difference in means")
-    plt.savefig("means_diference")
 
-    
-    plt.figure(2)
-    plt.plot(np.abs(np.array(s_lb_0) - np.array(s_ub_1)))
+    plt.plot(np.abs(np.array(lb_0) - np.array(ub_1)), c='blue')
+    plt.title("Absolute value of difference in means")
+    plt.savefig("means_diference", dpi=300)
+    plt.close()
+
+
+    plt.plot(np.abs(np.array(s_lb_0) - np.array(s_ub_1)), c='blue')
     plt.title("Absolute value of difference in bounds")
-    plt.savefig("means_diference_2")
+    plt.savefig("means_diference_2", dpi=300)
+    plt.close()
