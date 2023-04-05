@@ -26,7 +26,7 @@ def simulate_data_different_means(dataset_size: int, time_steps:int):
     """
     means_1 = []
     means_0 = []
-    p_x_0 = [0.5, 0.3, 0.2]
+
     for t in range(time_steps):
         X = np.random.choice(a=[0, 1, 2], size=dataset_size, p=p_x_0)
 
@@ -62,6 +62,7 @@ def simulate_data_same_means(dataset_size: int, time_steps:int):
         X = np.random.choice(a=[0, 1, 2], size=dataset_size, p=p_x_0)
 
         pi_A =  np.random.choice(a=[0,1], size=dataset_size, p=[0.3, 0.7])
+        # TODO: depend on X
         A = 1*(pi_A > np.random.uniform(size=dataset_size))
 
         mu = scipy.special.expit(2*X)
@@ -88,13 +89,17 @@ if __name__ == '__main__':
         E_0 += scipy.special.expit(0 - x_0)*(p_x_0[x_0])
         E_1 += scipy.special.expit(2 - x_0)*(p_x_0[x_0])
 
+    print(E_0, E_1)
+
     fig, axs = plt.subplots(1, 2)
-    axs[0].plot(np.arange(TIME_STEPS), lb_0, c='navy', label='A = 0')
-    axs[0].plot(np.arange(TIME_STEPS), ub_0, c='navy')
-    axs[0].plot(np.arange(TIME_STEPS), lb_1, c='tab:olive', label='A = 1')
-    axs[0].plot(np.arange(TIME_STEPS), ub_1, c='tab:olive')
-    # plt.axhline(E_0, ls='--', c='k')
-    # plt.axhline(E_1, ls='--', c='r')
+    axs[0].plot(means_1)
+    axs[0].plot(means_0)
+    # axs[0].plot(np.arange(TIME_STEPS), lb_0, c='navy', label='A = 0')
+    # axs[0].plot(np.arange(TIME_STEPS), ub_0, c='navy')
+    # axs[0].plot(np.arange(TIME_STEPS), lb_1, c='tab:olive', label='A = 1')
+    # axs[0].plot(np.arange(TIME_STEPS), ub_1, c='tab:olive')
+    axs[0].axhline(E_0, ls='--', c='k')
+    axs[0].axhline(E_1, ls='--', c='r')
     fig.suptitle("Confidence sequence for E[y|A]_t")
     axs[0].legend()
 
@@ -112,7 +117,6 @@ if __name__ == '__main__':
     axs[1].legend()
     fig.savefig("confidence_sequence")
 
-    plt.figure(1)
     plt.plot(np.abs(np.array(lb_0) - np.array(ub_1)))
     plt.title("Absolute value of difference in means")
     plt.savefig("means_diference")
