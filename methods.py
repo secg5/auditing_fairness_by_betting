@@ -93,16 +93,20 @@ def seq_perm_test(seq1, seq2, p=0.05, k=100, bonferroni=False):
             return k*(i+1), 'reject'
     return l, 'sustain'
 
-def seq_perm_test_experiment(seq1, seq2, alphas, iters=10, k=100, bonferroni=False): 
+def seq_perm_test_experiment(seq1, seq2, alphas, iters=10, k=100, bonferroni=False, shift_time=None): 
     
     results = []
     rejections = []
+    s1, s2 = seq1, seq2
     for _ in range(iters): 
         taus, rejects = [], []
-        np.random.shuffle(seq1)
-        np.random.shuffle(seq2)
+        if shift_time != None: 
+            s1, s2 = shuffle_with_shift(seq1, seq2, shift_time)
+        else: 
+            np.random.shuffle(s1)
+            np.random.shuffle(s2)
         for alpha in alphas: 
-            steps, reject = seq_perm_test(seq1, seq2, p=alpha, k=k, bonferroni=bonferroni)
+            steps, reject = seq_perm_test(s1, s2, p=alpha, k=k, bonferroni=bonferroni)
             taus.append(steps)
             rejects.append(True if reject == 'reject' else False)
         results.append(taus)
