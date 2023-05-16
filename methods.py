@@ -1,5 +1,6 @@
 import numpy as np 
 import os 
+import pickle
 from scipy.stats import permutation_test
 
 def test_by_betting(seq1, seq2, alpha=0.05): 
