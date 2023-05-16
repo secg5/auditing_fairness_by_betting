@@ -88,9 +88,9 @@ def seq_perm_test_experiment(seq1, seq2, alphas, iters=10, k=100, bonferroni=Fal
 def get_mean_std(arr): 
     return np.mean(arr, axis=0), np.std(arr, axis=0)
 
-def plt_mean_std(ax, arr, alphas, label, color='navy', plot_std=True): 
+def plt_mean_std(ax, arr, alphas, label, color='navy', plot_std=True, **kwargs): 
     mean, std = get_mean_std(arr)
-    ax.plot(alphas, mean, lw=2, label=label, c=color)
+    ax.plot(alphas, mean, lw=2, label=label, c=color, **kwargs)
     if plot_std: 
         ax.fill_between(alphas, mean-std, mean+std, alpha=0.05, color=color)
 
